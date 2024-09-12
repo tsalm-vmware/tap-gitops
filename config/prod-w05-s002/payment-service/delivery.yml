@@ -1,0 +1,80 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: payment-service
+  annotations:
+    ootb.apps.tanzu.vmware.com/servicebinding-workload: "true"
+    ootb.apps.tanzu.vmware.com/apidescriptor-ref: "true"
+    kapp.k14s.io/change-rule: upsert after upserting servicebinding.io/ServiceBindings
+  labels:
+    app.kubernetes.io/part-of: payment-service
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/workload-type: web
+    kapp.k14s.io/app: "1683644253888334007"
+    kapp.k14s.io/association: v1.94e5aec6b444673a6430941152e5cf8a
+    app.kubernetes.io/component: run
+    carto.run/workload-name: payment-service
+spec:
+  template:
+    metadata:
+      annotations:
+        boot.spring.io/actuator: http://:8081/actuator
+        boot.spring.io/version: 2.7.5
+        conventions.carto.run/applied-conventions: |-
+          appliveview-sample/app-live-view-appflavour-check
+          spring-boot-convention/auto-configure-actuators-check
+          spring-boot-convention/spring-boot
+          spring-boot-convention/spring-boot-graceful-shutdown
+          spring-boot-convention/spring-boot-web
+          spring-boot-convention/spring-boot-actuator
+          spring-boot-convention/spring-boot-actuator-probes
+          spring-boot-convention/app-live-view-appflavour-check
+          spring-boot-convention/app-live-view-connector-boot
+          spring-boot-convention/app-live-view-appflavours-boot
+          spring-boot-convention/service-intent-postgres
+        developer.conventions/target-containers: workload
+        kapp.k14s.io/identity: v1;prod-w05-s002/carto.run/Workload/payment-service;carto.run/v1alpha1
+        kapp.k14s.io/original: '{"apiVersion":"carto.run/v1alpha1","kind":"Workload","metadata":{"labels":{"app.kubernetes.io/part-of":"payment-service","apps.tanzu.vmware.com/has-tests":"true","apps.tanzu.vmware.com/workload-type":"web","kapp.k14s.io/app":"1683644253888334007","kapp.k14s.io/association":"v1.94e5aec6b444673a6430941152e5cf8a"},"name":"payment-service","namespace":"prod-w05-s002"},"spec":{"build":{"env":[{"name":"BP_JVM_VERSION","value":"17"}]},"serviceClaims":[{"name":"db","ref":{"apiVersion":"services.apps.tanzu.vmware.com/v1alpha1","kind":"ClassClaim","name":"postgres-1"}}],"source":{"git":{"ref":{"branch":"main"},"url":"https://github.com/tsalm-vmware/tap-workshops-payment-service.git"}}}}'
+        kapp.k14s.io/original-diff-md5: c6e94dc94aed3401b5d0f26ed6c0bff3
+        services.conventions.carto.run/postgres: postgresql/42.3.7
+      labels:
+        app.kubernetes.io/component: run
+        app.kubernetes.io/part-of: payment-service
+        apps.tanzu.vmware.com/auto-configure-actuators: "true"
+        apps.tanzu.vmware.com/has-tests: "true"
+        apps.tanzu.vmware.com/workload-type: web
+        carto.run/workload-name: payment-service
+        conventions.carto.run/framework: spring-boot
+        kapp.k14s.io/app: "1683644253888334007"
+        kapp.k14s.io/association: v1.94e5aec6b444673a6430941152e5cf8a
+        services.conventions.carto.run/postgres: workload
+        tanzu.app.live.view: "true"
+        tanzu.app.live.view.application.actuator.path: actuator
+        tanzu.app.live.view.application.actuator.port: "8081"
+        tanzu.app.live.view.application.flavours: spring-boot
+        tanzu.app.live.view.application.name: payment-service
+    spec:
+      containers:
+      - env:
+        - name: JAVA_TOOL_OPTIONS
+          value: -Dmanagement.endpoint.health.probes.add-additional-paths="true" -Dmanagement.endpoint.health.show-details="always" -Dmanagement.endpoints.web.base-path="/actuator" -Dmanagement.endpoints.web.exposure.include="*" -Dmanagement.health.probes.enabled="true" -Dmanagement.server.port="8081" -Dserver.port="8080" -Dserver.shutdown.grace-period="24s"
+        image: harbor.emea.end2end.link/tap/workloads/payment-service-prod-w05-s002@sha256:7b179b766feb1606349ab162d8f2e5eb55975035a06d2a4779650ae09ee9e56b
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8080
+            scheme: HTTP
+        name: workload
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+            scheme: HTTP
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+      serviceAccountName: default
+
