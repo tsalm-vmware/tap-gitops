@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping-service
+  annotations:
+    kapp.k14s.io/update-strategy: fallback-on-replace
+    ootb.apps.tanzu.vmware.com/servicebinding-workload: "true"
+    kapp.k14s.io/change-rule: upsert after upserting servicebinding.io/ServiceBindings
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    learningcenter.tanzu.vmware.com/component: session
+    learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+    learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+    learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s047
+    learningcenter.tanzu.vmware.com/session.objects: "true"
+    learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+    app.kubernetes.io/component: run
+    carto.run/workload-name: shipping-service
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: run
+      apps.tanzu.vmware.com/auto-configure-actuators: "true"
+      apps.tanzu.vmware.com/workload-type: server
+      carto.run/workload-name: shipping-service
+      conventions.carto.run/framework: spring-boot
+      learningcenter.tanzu.vmware.com/component: session
+      learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+      learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+      learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s047
+      learningcenter.tanzu.vmware.com/session.objects: "true"
+      learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+      services.conventions.carto.run/rabbitmq: workload
+      tanzu.app.live.view: "true"
+      tanzu.app.live.view.application.actuator.path: actuator
+      tanzu.app.live.view.application.actuator.port: "8081"
+      tanzu.app.live.view.application.flavours: spring-boot
+      tanzu.app.live.view.application.name: shipping-service
+  template:
+    metadata:
+      annotations:
+        boot.spring.io/actuator: http://:8081/actuator
+        boot.spring.io/version: 3.1.2
+        conventions.carto.run/applied-conventions: |-
+          appliveview-sample/app-live-view-appflavour-check
+          spring-boot-convention/auto-configure-actuators-check
+          spring-boot-convention/spring-boot
+          spring-boot-convention/spring-boot-graceful-shutdown
+          spring-boot-convention/spring-boot-web
+          spring-boot-convention/spring-boot-actuator
+          spring-boot-convention/spring-boot-actuator-probes
+          spring-boot-convention/app-live-view-appflavour-check
+          spring-boot-convention/app-live-view-connector-boot
+          spring-boot-convention/app-live-view-appflavours-boot
+          spring-boot-convention/service-intent-rabbitmq
+        developer.conventions/target-containers: workload
+        services.conventions.carto.run/rabbitmq: amqp-client/5.17.1
+      labels:
+        app.kubernetes.io/component: run
+        apps.tanzu.vmware.com/auto-configure-actuators: "true"
+        apps.tanzu.vmware.com/workload-type: server
+        carto.run/workload-name: shipping-service
+        conventions.carto.run/framework: spring-boot
+        learningcenter.tanzu.vmware.com/component: session
+        learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+        learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+        learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s047
+        learningcenter.tanzu.vmware.com/session.objects: "true"
+        learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+        services.conventions.carto.run/rabbitmq: workload
+        tanzu.app.live.view: "true"
+        tanzu.app.live.view.application.actuator.path: actuator
+        tanzu.app.live.view.application.actuator.port: "8081"
+        tanzu.app.live.view.application.flavours: spring-boot
+        tanzu.app.live.view.application.name: shipping-service
+    spec:
+      containers:
+      - env:
+        - name: JAVA_TOOL_OPTIONS
+          value: -Dmanagement.endpoint.health.probes.add-additional-paths="true" -Dmanagement.endpoint.health.show-details="always" -Dmanagement.endpoints.web.base-path="/actuator" -Dmanagement.endpoints.web.exposure.include="*" -Dmanagement.health.probes.enabled="true" -Dmanagement.server.port="8081" -Dserver.port="8080" -Dserver.shutdown.grace-period="24s"
+        image: harbor.emea.end2end.link/tap/workloads/shipping-service-developer-workshops-w01-s047@sha256:6e7f5dfc98772c6efdcd62c7ae87c0ecbbc1a057731e04ae158872c98e51fcf8
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8080
+            scheme: HTTP
+        name: workload
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+            scheme: HTTP
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+      serviceAccountName: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping-service
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    learningcenter.tanzu.vmware.com/component: session
+    learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+    learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+    learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s047
+    learningcenter.tanzu.vmware.com/session.objects: "true"
+    learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+    app.kubernetes.io/component: run
+    carto.run/workload-name: shipping-service
+spec:
+  selector:
+    app.kubernetes.io/component: run
+    apps.tanzu.vmware.com/auto-configure-actuators: "true"
+    apps.tanzu.vmware.com/workload-type: server
+    carto.run/workload-name: shipping-service
+    conventions.carto.run/framework: spring-boot
+    learningcenter.tanzu.vmware.com/component: session
+    learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+    learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+    learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s047
+    learningcenter.tanzu.vmware.com/session.objects: "true"
+    learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+    services.conventions.carto.run/rabbitmq: workload
+    tanzu.app.live.view: "true"
+    tanzu.app.live.view.application.actuator.path: actuator
+    tanzu.app.live.view.application.actuator.port: "8081"
+    tanzu.app.live.view.application.flavours: spring-boot
+    tanzu.app.live.view.application.name: shipping-service
+  ports:
+  - targetPort: 8080
+    port: 8080
+    name: http
+
