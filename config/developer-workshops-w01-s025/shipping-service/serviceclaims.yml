@@ -1,0 +1,69 @@
+apiVersion: kapp.k14s.io/v1alpha1
+kind: Config
+waitRules:
+- conditionMatchers:
+  - type: ServiceAvailable
+    status: "False"
+    failure: true
+  - type: ServiceAvailable
+    status: "True"
+    success: true
+  resourceMatchers:
+  - apiVersionKindMatcher:
+      apiVersion: servicebinding.io/v1alpha3
+      kind: ServiceBinding
+---
+apiVersion: servicebinding.io/v1alpha3
+kind: ServiceBinding
+metadata:
+  name: shipping-service-rmq
+  annotations:
+    kapp.k14s.io/change-group: servicebinding.io/ServiceBindings
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    learningcenter.tanzu.vmware.com/component: session
+    learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+    learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+    learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s025
+    learningcenter.tanzu.vmware.com/session.objects: "true"
+    learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+    app.kubernetes.io/component: run
+    carto.run/workload-name: shipping-service
+spec:
+  name: rmq
+  service:
+    apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+    kind: ClassClaim
+    name: rmq-1
+  workload:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: shipping-service
+---
+apiVersion: servicebinding.io/v1alpha3
+kind: ServiceBinding
+metadata:
+  name: shipping-service-config-server
+  annotations:
+    kapp.k14s.io/change-group: servicebinding.io/ServiceBindings
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    learningcenter.tanzu.vmware.com/component: session
+    learningcenter.tanzu.vmware.com/environment.name: developer-workshops-w01
+    learningcenter.tanzu.vmware.com/portal.name: developer-workshops
+    learningcenter.tanzu.vmware.com/session.name: developer-workshops-w01-s025
+    learningcenter.tanzu.vmware.com/session.objects: "true"
+    learningcenter.tanzu.vmware.com/workshop.name: modern-app-arch-spring-cloud-workshop
+    app.kubernetes.io/component: run
+    carto.run/workload-name: shipping-service
+spec:
+  name: config-server
+  service:
+    apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+    kind: ResourceClaim
+    name: configserver-binding-compatible
+  workload:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: shipping-service
+
